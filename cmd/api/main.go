@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/maxwellkuo47/tradingEngine/internal/data"
+	"github.com/redis/go-redis/v9"
 )
 
 type config struct {
@@ -27,6 +28,9 @@ type config struct {
 		burst   int
 		enabled bool
 	}
+	redis struct {
+		enabled bool
+	}
 }
 
 type application struct {
@@ -35,6 +39,7 @@ type application struct {
 	infoLogger  *slog.Logger
 	models      data.Models
 	wg          sync.WaitGroup
+	redisClient *redis.Client
 }
 
 func main() {
@@ -54,6 +59,9 @@ func main() {
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 10, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 
+	// redis
+	flag.BoolVar(&cfg.redis.enabled, "redis-enabled", true, "Enable redis")
+
 	// parsing flag
 	flag.Parse()
 	infoLogger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
@@ -67,19 +75,27 @@ func main() {
 
 	db, err := OpenDB(cfg)
 	if err != nil {
-		errorLogger.Error("OpenDB Err", slog.String("msg", err.Error()))
+		errorLogger.Error("OpenDB error", slog.String("msg", err.Error()))
 		os.Exit(1)
 	}
 	defer db.Close()
 	infoLogger.Info("DB Connection", slog.String("Status", "OK"))
+
+	redis, err := createRedisClient()
+	if err != nil {
+		errorLogger.Error("createRedisClient error", slog.String("msg", err.Error()))
+		os.Exit(1)
+	}
+	infoLogger.Info("Redis Connection", slog.String("Status", "OK"))
 
 	app := &application{
 		config:      cfg,
 		infoLogger:  infoLogger,
 		errorLogger: errorLogger,
 		models:      data.NewModels(db),
+		redisClient: redis,
 	}
-
+	_, _ = createRedisClient()
 	err = app.serve()
 	if err != nil {
 		errorLogger.Error("fatal error", slog.String("msg", err.Error()))

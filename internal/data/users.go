@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"time"
@@ -13,6 +14,12 @@ import (
 var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
+
+var AnonymousUser = &User{}
+
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
+}
 
 type UserModel struct {
 	DB *sql.DB
@@ -116,6 +123,42 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 
 	var user User
 	err := m.DB.QueryRowContext(ctx, query, email).Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+		&user.Version,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &user, nil
+}
+
+func (m UserModel) GetForToken(tokenPlaintext string) (*User, error) {
+	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
+	query := `SELECT users.id, users.created_at, users.name, users.email, users.password_hash, users.activated, users.version
+						FROM users
+						INNER JOIN tokens
+						ON users.id = tokens.user_id
+						WHERE tokens.hash = $1
+						AND tokens.expiry > $2`
+
+	args := []any{tokenHash[:], time.Now()}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	var user User
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
 		&user.ID,
 		&user.CreatedAt,
 		&user.Name,

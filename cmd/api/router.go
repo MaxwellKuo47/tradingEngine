@@ -9,8 +9,8 @@ import (
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
-	router.NotFound = http.HandlerFunc(app.notFoundResponse)
-	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
+	router.NotFound = http.HandlerFunc(app.notFoundResp)
+	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResp)
 
 	// system
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
@@ -19,5 +19,8 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.userRegisterHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/users/authentication", app.userLoginHandler)
 
-	return app.recoverPanic(app.rateLimit(router))
+	// order
+	router.HandlerFunc(http.MethodPost, "/v1/orders", app.requireAuthenticatedUser(app.orderCreate))
+
+	return app.recoverPanic(app.rateLimit(app.authenticate(router)))
 }
