@@ -36,7 +36,7 @@ CREATE TABLE "trades" (
   "executed_at" timestamp NOT NULL DEFAULT (now())
 );
 
-CREATE TABLE "user_stock_blances" (
+CREATE TABLE "user_stock_balances" (
   "id" bigserial PRIMARY KEY,
   "user_id" bigint UNIQUE NOT NULL,
   "stock_id" bigint NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE "user_stock_blances" (
 CREATE TABLE "user_wallets" (
   "id" bigserial PRIMARY KEY,
   "user_id" bigint NOT NULL,
-  "blance" decimal NOT NULL,
+  "balance" decimal NOT NULL,
   "updated_at" timestamp NOT NULL DEFAULT (now()),
   "version" integer NOT NULL DEFAULT 1
 );
@@ -72,11 +72,11 @@ CREATE INDEX ON "trades" ("order_id");
 
 CREATE INDEX ON "trades" ("user_id", "order_id");
 
-CREATE INDEX ON "user_stock_blances" ("user_id");
+CREATE INDEX ON "user_stock_balances" ("user_id");
 
-CREATE INDEX ON "user_stock_blances" ("stock_id");
+CREATE INDEX ON "user_stock_balances" ("stock_id");
 
-CREATE INDEX ON "user_stock_blances" ("user_id", "stock_id");
+CREATE INDEX ON "user_stock_balances" ("user_id", "stock_id");
 
 CREATE INDEX ON "user_wallets" ("user_id");
 
@@ -98,8 +98,14 @@ ALTER TABLE "trades" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 ALTER TABLE "trades" ADD FOREIGN KEY ("order_id") REFERENCES "orders" ("id");
 
-ALTER TABLE "user_stock_blances" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "user_stock_balances" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "user_stock_blances" ADD FOREIGN KEY ("stock_id") REFERENCES "stocks" ("id");
+ALTER TABLE "user_stock_balances" ADD FOREIGN KEY ("stock_id") REFERENCES "stocks" ("id");
 
 ALTER TABLE "user_wallets" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+INSERT INTO stocks (name) VALUES('BNB');
+INSERT INTO stocks (name) VALUES('BTC');
+INSERT INTO stocks (name) VALUES('ETH');
+INSERT INTO stocks (name) VALUES('DOT');
+INSERT INTO stocks (name) VALUES('SOL');

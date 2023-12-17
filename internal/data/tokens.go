@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
-	"database/sql"
 	"encoding/base32"
 	"time"
 
@@ -44,7 +43,7 @@ func ValidateTokenPlaintext(v *validator.Validator, tokenPlaintext string) {
 }
 
 type TokenModel struct {
-	DB *sql.DB
+	DB DBTX
 }
 
 func (m TokenModel) New(userID int64, ttl time.Duration) (*Token, error) {

@@ -22,5 +22,8 @@ func (app *application) routes() http.Handler {
 	// order
 	router.HandlerFunc(http.MethodPost, "/v1/orders", app.requireAuthenticatedUser(app.orderCreate))
 
+	// for adjust fake stock value
+	router.HandlerFunc(http.MethodPost, "/v1/stockValueChangeHandler", app.adjustStockPrice)
+
 	return app.recoverPanic(app.rateLimit(app.authenticate(router)))
 }

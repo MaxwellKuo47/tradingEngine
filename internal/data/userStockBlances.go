@@ -8,7 +8,7 @@ import (
 )
 
 type UserStockBalanceModel struct {
-	DB *sql.DB
+	DB DBTX
 }
 
 type UserStockBalance struct {
@@ -31,7 +31,7 @@ func (m UserStockBalanceModel) GetUserStockBalance(userID int64, stockID int64) 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var stockBalance *UserStockBalance
+	var stockBalance UserStockBalance
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&stockBalance.ID, &stockBalance.UserID, &stockBalance.StockID, &stockBalance.Quantity, &stockBalance.Version)
 	if err != nil {
 		switch {
@@ -41,7 +41,7 @@ func (m UserStockBalanceModel) GetUserStockBalance(userID int64, stockID int64) 
 			return nil, err
 		}
 	}
-	return stockBalance, nil
+	return &stockBalance, nil
 }
 
 func (m UserStockBalanceModel) Update(stockBalance *UserStockBalance) error {

@@ -22,7 +22,7 @@ func (u *User) IsAnonymous() bool {
 }
 
 type UserModel struct {
-	DB *sql.DB
+	DB DBTX
 }
 
 type password struct {

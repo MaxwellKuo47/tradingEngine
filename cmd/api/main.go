@@ -34,12 +34,13 @@ type config struct {
 }
 
 type application struct {
-	config      config
-	errorLogger *slog.Logger
-	infoLogger  *slog.Logger
-	models      data.Models
-	wg          sync.WaitGroup
-	redisClient *redis.Client
+	config          config
+	errorLogger     *slog.Logger
+	infoLogger      *slog.Logger
+	models          data.DBModels
+	wg              sync.WaitGroup
+	redisClient     *redis.Client
+	mockStockPrices sync.Map
 }
 
 func main() {
@@ -95,6 +96,13 @@ func main() {
 		models:      data.NewModels(db),
 		redisClient: redis,
 	}
+
+	err = app.createFakeStockPricesForTesting()
+	if err != nil {
+		errorLogger.Error("createFakeStockPricesForTesting error", slog.String("msg", err.Error()))
+		os.Exit(1)
+	}
+
 	_, _ = createRedisClient()
 	err = app.serve()
 	if err != nil {

@@ -1,12 +1,11 @@
 package data
 
 import (
-	"database/sql"
 	"time"
 )
 
 type TradeModel struct {
-	DB *sql.DB
+	DB DBTX
 }
 
 type Trade struct {

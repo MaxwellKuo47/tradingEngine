@@ -8,7 +8,7 @@ import (
 )
 
 type UserWalletModel struct {
-	DB *sql.DB
+	DB DBTX
 }
 
 var (
@@ -18,7 +18,7 @@ var (
 type UserWallet struct {
 	ID       int64     `json:"id"`
 	UserID   int64     `json:"user_id"`
-	Balance  float64   `json:"blance"`
+	Balance  float64   `json:"balance"`
 	UpdateAt time.Time `json:"updated_at"`
 	Version  int       `json:"-"`
 }
@@ -32,7 +32,7 @@ func (m UserWalletModel) New(userID int64) error {
 }
 
 func (m UserWalletModel) Insert(wallet UserWallet) error {
-	query := `INSERT INTO user_wallets (user_id, blance))
+	query := `INSERT INTO user_wallets (user_id, balance)
 						VALUES($1, $2)`
 
 	args := []any{
@@ -62,7 +62,7 @@ func (m UserWalletModel) GetUserWallet(userID int64) (*UserWallet, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	var wallet *UserWallet
+	var wallet UserWallet
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&wallet.ID, &wallet.UserID, &wallet.Balance, &wallet.Version)
 	if err != nil {
 		switch {
@@ -73,12 +73,12 @@ func (m UserWalletModel) GetUserWallet(userID int64) (*UserWallet, error) {
 		}
 	}
 
-	return wallet, nil
+	return &wallet, nil
 }
 
 func (m UserWalletModel) Update(wallet *UserWallet) error {
 	query := `UPDATE user_wallets
-						SET blance=$1, update_at=NOW(), version = version + 1
+						SET balance=$1, updated_at=NOW(), version = version + 1
 						WHERE id=$2 AND version=$3
 						RETURNING version`
 

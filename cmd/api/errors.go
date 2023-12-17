@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"runtime/debug"
 )
 
 func (app *application) logError(r *http.Request, err error) {
@@ -12,6 +13,7 @@ func (app *application) logError(r *http.Request, err error) {
 		slog.String("msg", err.Error()),
 		slog.String("request_method", r.Method),
 		slog.String("request_url", r.URL.String()),
+		slog.String("debug", string(debug.Stack())),
 	)
 }
 

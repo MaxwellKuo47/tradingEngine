@@ -51,11 +51,17 @@ func (app *application) orderCreate(w http.ResponseWriter, r *http.Request) {
 
 	// get user data
 	user := app.contextGetUser(r)
-
+	tx, err := app.models.DBHandler.Begin()
+	if err != nil {
+		app.serverErrResp(w, r, err)
+		return
+	}
+	defer tx.Rollback()
+	txModels := data.NewTxModels(tx)
 	//check and update wallet/stock Balance
 	switch order.Type {
 	case data.ORDER_TYPE_BUY: // BUY
-		wallet, err := app.models.UserWallet.GetUserWallet(user.ID)
+		wallet, err := txModels.UserWallet.GetUserWallet(user.ID)
 		if err != nil {
 			switch {
 			case errors.Is(err, data.ErrRecordNotFound):
@@ -72,7 +78,7 @@ func (app *application) orderCreate(w http.ResponseWriter, r *http.Request) {
 
 		// update wallet
 		wallet.Balance -= order.Price * float64(order.Quantity)
-		err = app.models.UserWallet.Update(wallet)
+		err = txModels.UserWallet.Update(wallet)
 		if err != nil {
 			switch {
 			case errors.Is(err, data.ErrEditConflict):
@@ -83,7 +89,7 @@ func (app *application) orderCreate(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case data.ORDER_TYPE_SELL: // SELL
-		stockBalance, err := app.models.UserStockBalance.GetUserStockBalance(user.ID, order.StockID)
+		stockBalance, err := txModels.UserStockBalance.GetUserStockBalance(user.ID, order.StockID)
 		if err != nil {
 			switch {
 			case errors.Is(err, data.ErrRecordNotFound):
@@ -100,7 +106,7 @@ func (app *application) orderCreate(w http.ResponseWriter, r *http.Request) {
 
 		// update stock balance
 		stockBalance.Quantity -= order.Quantity
-		err = app.models.UserStockBalance.Update(stockBalance)
+		err = txModels.UserStockBalance.Update(stockBalance)
 		if err != nil {
 			switch {
 			case errors.Is(err, data.ErrEditConflict):
@@ -115,12 +121,29 @@ func (app *application) orderCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	order.UserID = user.ID
 
-	err = app.models.Order.Insert(order)
+	err = txModels.Order.Insert(order)
 	if err != nil {
 		app.serverErrResp(w, r, err)
 		return
 	}
 
+	switch order.Type {
+	case data.ORDER_TYPE_BUY:
+		err = app.insertBuyOrder(order)
+		if err != nil {
+			app.serverErrResp(w, r, err)
+			return
+		}
+	case data.ORDER_TYPE_SELL:
+		err = app.insertSellOrder(order)
+		if err != nil {
+			app.serverErrResp(w, r, err)
+			return
+		}
+	default:
+		panic("invalid type should be eliminate at insert state")
+	}
+	tx.Commit()
 	err = app.writeJSON(w, http.StatusCreated, envelope{"message": "order create successfully"}, nil)
 	if err != nil {
 		app.serverErrResp(w, r, err)

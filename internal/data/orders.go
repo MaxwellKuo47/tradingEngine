@@ -10,7 +10,7 @@ import (
 )
 
 type OrderModel struct {
-	DB *sql.DB
+	DB DBTX
 }
 
 const (

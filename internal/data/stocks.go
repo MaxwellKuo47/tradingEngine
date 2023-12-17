@@ -13,7 +13,7 @@ type Stock struct {
 }
 
 type StockModel struct {
-	DB *sql.DB
+	DB DBTX
 }
 
 func (m StockModel) ConfirmStockExist(stock_id int64) (bool, error) {
@@ -34,4 +34,24 @@ func (m StockModel) ConfirmStockExist(stock_id int64) (bool, error) {
 		}
 	}
 	return exist, err
+}
+
+func (m StockModel) GetAllStockIDs() ([]int64, error) {
+	query := `SELECT id FROM stocks;`
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	var stockIDs []int64
+
+	err := m.DB.QueryRowContext(ctx, query).Scan(&stockIDs)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return stockIDs, err
 }
