@@ -145,7 +145,7 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 
 func (m UserModel) GetForToken(tokenPlaintext string) (*User, error) {
 	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
-	query := `SELECT users.id, users.created_at, users.name, users.email, users.password_hash, users.activated, users.version
+	query := `SELECT users.id, users.created_at, users.name, users.email, users.password_hash, users.version
 						FROM users
 						INNER JOIN tokens
 						ON users.id = tokens.user_id

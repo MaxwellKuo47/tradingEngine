@@ -16,7 +16,7 @@ type StockModel struct {
 	DB *sql.DB
 }
 
-func (m *StockModel) ConfirmStockExist(stock_id int64) (bool, error) {
+func (m StockModel) ConfirmStockExist(stock_id int64) (bool, error) {
 	query := `SELECT EXISTS (SELECT 1 FROM stocks WHERE id = $1);`
 	args := []any{stock_id}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)

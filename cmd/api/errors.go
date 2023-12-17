@@ -75,3 +75,13 @@ func (app *application) authRequiredResp(w http.ResponseWriter, r *http.Request)
 	message := "you must be authenticated to access this resource"
 	app.errResp(w, r, http.StatusUnauthorized, message)
 }
+
+func (app *application) insufficientBalanceResp(w http.ResponseWriter, r *http.Request) {
+	message := "Insufficient balance to perform the transaction"
+	app.errResp(w, r, http.StatusForbidden, message)
+}
+
+func (app *application) balanceRecordNotFoundResp(w http.ResponseWriter, r *http.Request) {
+	message := "unexpected balance record not found"
+	app.errResp(w, r, http.StatusForbidden, message)
+}

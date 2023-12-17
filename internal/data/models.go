@@ -6,11 +6,13 @@ import (
 )
 
 type Models struct {
-	Users UserModel
-	Token TokenModel
-	Order OrderModel
-	Trade TradeModel
-	Stock StockModel
+	Users            UserModel
+	Token            TokenModel
+	Order            OrderModel
+	Trade            TradeModel
+	Stock            StockModel
+	UserWallet       UserWalletModel
+	UserStockBalance UserStockBalanceModel
 }
 
 var (
@@ -20,10 +22,12 @@ var (
 
 func NewModels(db *sql.DB) Models {
 	return Models{
-		Users: UserModel{DB: db},
-		Token: TokenModel{DB: db},
-		Order: OrderModel{DB: db},
-		Trade: TradeModel{DB: db},
-		Stock: StockModel{DB: db},
+		Users:            UserModel{DB: db},
+		Token:            TokenModel{DB: db},
+		Order:            OrderModel{DB: db},
+		Trade:            TradeModel{DB: db},
+		Stock:            StockModel{DB: db},
+		UserWallet:       UserWalletModel{DB: db},
+		UserStockBalance: UserStockBalanceModel{DB: db},
 	}
 }
