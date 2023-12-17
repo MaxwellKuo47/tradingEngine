@@ -47,7 +47,8 @@ func (m UserStockBalanceModel) GetUserStockBalance(userID int64, stockID int64) 
 func (m UserStockBalanceModel) Update(stockBalance *UserStockBalance) error {
 	query := `UPDATE user_stock_balances 
 						SET quantity = $1, updated_at = NOW(), version = version + 1 
-						WHERE id = $2 AND version = $3`
+						WHERE id = $2 AND version = $3
+						RETURNING version`
 	args := []any{
 		stockBalance.Quantity,
 		stockBalance.ID,
@@ -57,7 +58,7 @@ func (m UserStockBalanceModel) Update(stockBalance *UserStockBalance) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err := m.DB.ExecContext(ctx, query, args...)
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&stockBalance.Version)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
