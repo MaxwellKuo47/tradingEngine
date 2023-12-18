@@ -62,3 +62,16 @@ This project uses Docker for Redis and PostgreSQL, and requires the Go-Migrate C
   # for linux os
   ./bin/linux_amd64/api
   ```
+## Database Schema
+
+The Trading Engine uses a PostgreSQL database with the following key tables:
+
+- `users`: Stores user information including name, email, and hashed password.
+- `tokens`: Manages authentication tokens and their expiry.
+- `orders`: Records details of buy and sell orders, including quantity, price, and status.
+- `trades`: Records consumed buy/sell order and their executed time.
+- `user_stock_balances`: Tracks users' stock quantities.
+- `user_wallets`: Maintains users' wallet balances.
+- `stocks`: Lists available stocks in the trading platform.
+
+Indexes and foreign keys are used for optimized query performance and data integrity. The schema is designed to support efficient order processing and user management in a high-frequency trading environment.
