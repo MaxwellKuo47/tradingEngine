@@ -31,7 +31,6 @@ type config struct {
 	consumer struct {
 		frequncy uint
 	}
-	testUsersAmount uint
 }
 
 type application struct {

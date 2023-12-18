@@ -159,6 +159,9 @@ Use for simulating stock price change to trigger buy/sell order consuming
 - **Example Output:**
     ```json
     {
-        "message": "order create successfully"
+        "params": {
+            "stock_id": 1,
+            "price": 130
+        }
     }
     ```
