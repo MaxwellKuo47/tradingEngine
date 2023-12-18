@@ -63,7 +63,7 @@ This project uses Docker for Redis and PostgreSQL, and requires the Go-Migrate C
   ./bin/linux_amd64/api
   ```
 ## Database Schema
-![image](https://github.com/MaxwellKuo47/tradingEngine/blob/main/assets/db/shop-Service.png)
+![image](https://github.com/MaxwellKuo47/tradingEngine/blob/main/assets/db/schema.png)
 The Trading Engine uses a PostgreSQL database with the following key tables:
 - `users`: Stores user information including name, email, and hashed password.
 - `tokens`: Manages authentication tokens and their expiry.
