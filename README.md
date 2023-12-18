@@ -161,7 +161,7 @@ Use for simulating stock price change to trigger buy/sell order consuming
     {
         "params": {
             "stock_id": 1,
-            "price": 130
+            "price": 90
         }
     }
     ```
