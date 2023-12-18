@@ -80,14 +80,44 @@ func (m OrderModel) Insert(order Order) error {
 
 	return err
 }
+func (m OrderModel) GetOrderForUpdate(orderID int64) (*Order, error) {
+	query := `SELECT id, user_id, stock_id, status, version FROM orders
+						WHERE id = $1`
 
-func (m OrderModel) UpdateOrderStatus(order Order, staus int) error {
-	query := `UPDATE orders SET status = $1
-						WHERE id=$2 AND version=$3`
+	args := []any{orderID}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var order Order
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&order.ID,
+		&order.UserID,
+		&order.StockID,
+		&order.Status,
+		&order.Version,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &order, nil
+}
+func (m OrderModel) UpdateOrderStatus(order *Order, staus int) error {
+	query := `UPDATE orders SET status = $1, updated_at = $2, version = version + 1
+						WHERE id=$3 AND version=$4`
 
 	args := []any{
-		order.ID,
 		staus,
+		order.UpdatedAt,
+		order.ID,
 		order.Version,
 	}
 

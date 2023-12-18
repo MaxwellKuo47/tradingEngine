@@ -20,8 +20,35 @@ type UserStockBalance struct {
 	Version   int       `json:"version"`
 }
 
+func (m UserStockBalanceModel) Insert(stockBalance *UserStockBalance) error {
+	query := `INSERT INTO user_stock_balances (user_id, stock_id, quantity, updated_at)
+						VALUES ($1, $2, $3, NOW()) 
+						RETURNING id, version`
+
+	args := []any{
+		stockBalance.UserID,
+		stockBalance.StockID,
+		stockBalance.Quantity,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&stockBalance.ID,
+		&stockBalance.Version,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 func (m UserStockBalanceModel) GetUserStockBalance(userID int64, stockID int64) (*UserStockBalance, error) {
-	query := `SELECT id, user_id, stock_id, quantity, version FROM user_stock_balances WHERE user_id = $1 AND stock_id = $2`
+	query := `SELECT id, user_id, stock_id, quantity, version 
+						FROM user_stock_balances 
+						WHERE user_id = $1 AND stock_id = $2`
 
 	args := []any{
 		userID,

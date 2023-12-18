@@ -85,7 +85,9 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any
 	return nil
 }
 
-// for goroutine
+// for spin up goroutine
+// implement recover method for panic recovery
+// implement waitGroup for graceful shutdown
 func (app *application) background(usage string, fn func()) {
 	app.wg.Add(1)
 	go func() {

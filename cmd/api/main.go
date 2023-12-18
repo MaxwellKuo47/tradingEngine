@@ -28,9 +28,6 @@ type config struct {
 		burst   int
 		enabled bool
 	}
-	redis struct {
-		enabled bool
-	}
 }
 
 type application struct {
@@ -41,6 +38,7 @@ type application struct {
 	wg              sync.WaitGroup
 	redisClient     *redis.Client
 	mockStockPrices sync.Map
+	done            chan bool
 }
 
 func main() {
@@ -59,9 +57,6 @@ func main() {
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 6, "Rate limiter maximum request per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 10, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
-
-	// redis
-	flag.BoolVar(&cfg.redis.enabled, "redis-enabled", true, "Enable redis")
 
 	// parsing flag
 	flag.Parse()
@@ -95,6 +90,7 @@ func main() {
 		errorLogger: errorLogger,
 		models:      data.NewModels(db),
 		redisClient: redis,
+		done:        make(chan bool),
 	}
 
 	err = app.createFakeStockPricesForTesting()
@@ -103,7 +99,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	_, _ = createRedisClient()
+	err = app.spinUpConsumer()
+	if err != nil {
+		errorLogger.Error("spinUpConsumer error", slog.String("msg", err.Error()))
+		os.Exit(1)
+	}
+
 	err = app.serve()
 	if err != nil {
 		errorLogger.Error("fatal error", slog.String("msg", err.Error()))

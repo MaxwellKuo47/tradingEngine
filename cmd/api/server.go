@@ -35,6 +35,8 @@ func (app *application) serve() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
+		close(app.done) // close all consumer
+
 		// calling server shutdown
 		err := srv.Shutdown(ctx)
 		if err != nil {
