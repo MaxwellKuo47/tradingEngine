@@ -40,14 +40,14 @@ func (app *application) createBuyOrderConsumer(stockID int64) {
 					// 2. update user wallet there is difference between actual price and order price
 					// 3. update user stock balance
 					// 4. create trade record
-					orderProcessName := fmt.Sprintf("stock_%d_process_buy_order_%d", stockID, redisOrder.OrderID)
 					// create a goroutine to process db transaction
-					// consumer just go for next order
+					// order consumer just go for next order
+					orderProcessName := fmt.Sprintf("stock_%d_process_buy_order_%d", stockID, redisOrder.OrderID)
 					app.background(orderProcessName, func() {
 						app.processBuyOrder(stockID, redisOrder.OrderID, redisOrder.UserID, currentPrice, currentTime)
 					})
 				}
-				time.Sleep(time.Millisecond * 50)
+				time.Sleep(time.Millisecond * time.Duration(app.config.consumer.frequncy)) // default 50ms
 			}
 		}
 	})
@@ -72,12 +72,14 @@ func (app *application) createSellOrderConsumer(stockID int64) {
 					// 1. update order status
 					// 2. update user wallet with the actual sell price
 					// 3. create trade record
+					// create a goroutine to process db transaction
+					// order consumer just go for next order
 					orderProcessName := fmt.Sprintf("stock_%d_process_sell_order_%d", stockID, redisOrder.OrderID)
 					app.background(orderProcessName, func() {
 						app.processSellOrder(stockID, redisOrder.OrderID, redisOrder.UserID, currentPrice, currentTime)
 					})
 				}
-				time.Sleep(time.Millisecond * 50)
+				time.Sleep(time.Millisecond * time.Duration(app.config.consumer.frequncy)) // default 50ms
 			}
 		}
 	})

@@ -11,7 +11,7 @@ This project is built using the following technologies and tools:
 - **Go (Golang)**: Primary programming language, chosen for its performance and concurrency support. Preference given to official Go libraries to ensure optimal performance.
 - **PostgreSQL**: Robust relational database used for storing and querying persistent data, ensuring data integrity and efficient access.
 - **Redis**: Utilizes sorted sets to manage order prices as keys for queue access, and implements FIFO (First-In-First-Out) queues for efficient order processing. 
-- **Docker (optional)**: Used for containerization, ensuring consistent environments and ease of deployment.
+- **Docker**: Used for containerization, ensuring consistent environments and ease of deployment.
 
 Each technology has been selected to optimize the performance and scalability of the trading engine, ensuring quick processing of high-frequency trading data.
 

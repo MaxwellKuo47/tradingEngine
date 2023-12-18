@@ -28,6 +28,9 @@ type config struct {
 		burst   int
 		enabled bool
 	}
+	consumer struct {
+		frequncy uint
+	}
 }
 
 type application struct {
@@ -57,6 +60,9 @@ func main() {
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 6, "Rate limiter maximum request per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 10, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+
+	// consumer frequency
+	flag.UintVar(&cfg.consumer.frequncy, "consumer-frequncy", 50, "Consumer frequency")
 
 	// parsing flag
 	flag.Parse()
