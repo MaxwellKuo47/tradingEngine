@@ -31,6 +31,13 @@ func (app *application) orderCreate(w http.ResponseWriter, r *http.Request) {
 		Price:     input.Price,
 		Status:    data.ORDER_STATUS_PENDING,
 	}
+
+	if order.PriceType == data.ORDER_PRCIE_TYPE_MARKET {
+		currentStockPrice, _ := app.mockStockPrices.Load(order.StockID)
+		// let the order could be consumed immediately
+		order.Price = currentStockPrice.(float64) + 10.0
+	}
+
 	// validate input data
 	v := validator.New()
 	if data.ValidateOrder(v, order); !v.Valid() {
@@ -121,7 +128,7 @@ func (app *application) orderCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	order.UserID = user.ID
 
-	err = txModels.Order.Insert(order)
+	err = txModels.Order.Insert(&order)
 	if err != nil {
 		app.serverErrResp(w, r, err)
 		return

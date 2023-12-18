@@ -49,7 +49,7 @@ func (app *application) createFakeStockPricesForTesting() error {
 	}
 
 	for _, id := range ids {
-		app.mockStockPrices.Store(id, 100)
+		app.mockStockPrices.Store(id, 100.0)
 	}
 
 	return nil

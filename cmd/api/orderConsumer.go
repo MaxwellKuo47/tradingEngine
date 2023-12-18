@@ -25,8 +25,11 @@ func (app *application) createBuyOrderConsumer(stockID int64) {
 	app.background(goroutineName, func() {
 		for {
 			select {
+
 			case <-app.done: // for gracefully shutdown
 				app.infoLogger.Info("stop buyOrderConsumer", slog.Int64("stock_id", stockID))
+				return
+
 			default:
 				price, _ := app.mockStockPrices.Load(stockID)
 				currentPrice := price.(float64)
@@ -58,8 +61,11 @@ func (app *application) createSellOrderConsumer(stockID int64) {
 	app.background(goroutineName, func() {
 		for {
 			select {
+
 			case <-app.done: // for gracefully shutdown
 				app.infoLogger.Info("stop sellOrderConsumer", slog.Int64("stock_id", stockID))
+				return
+
 			default:
 				price, _ := app.mockStockPrices.Load(stockID)
 				currentPrice := price.(float64)

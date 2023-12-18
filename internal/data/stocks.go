@@ -43,15 +43,23 @@ func (m StockModel) GetAllStockIDs() ([]int64, error) {
 
 	var stockIDs []int64
 
-	err := m.DB.QueryRowContext(ctx, query).Scan(&stockIDs)
+	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
-		default:
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id int64
+		err = rows.Scan(
+			&id,
+		)
+		if err != nil {
 			return nil, err
 		}
+		stockIDs = append(stockIDs, id)
 	}
-
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
 	return stockIDs, err
 }

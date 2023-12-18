@@ -26,7 +26,7 @@ type UserWallet struct {
 func (m UserWalletModel) New(userID int64) error {
 	UserWallet := UserWallet{
 		UserID:  userID,
-		Balance: 10000, // for test purpose
+		Balance: 100_000_000, // for test purpose
 	}
 	return m.Insert(UserWallet)
 }

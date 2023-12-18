@@ -58,7 +58,7 @@ func ValidateOrder(v *validator.Validator, order Order) {
 	v.Check(order.Price > 0, "price", "price must be positive")
 }
 
-func (m OrderModel) Insert(order Order) error {
+func (m OrderModel) Insert(order *Order) error {
 	query := `INSERT INTO orders (user_id, stock_id, type, quantity, price_type, price, status)
 						VALUES($1, $2, $3, $4, $5, $6, $7)
 						RETURNING id, created_at, version`
@@ -76,12 +76,16 @@ func (m OrderModel) Insert(order Order) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err := m.DB.ExecContext(ctx, query, args...)
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&order.ID,
+		&order.CreatedAt,
+		&order.Version,
+	)
 
 	return err
 }
 func (m OrderModel) GetOrderForUpdate(orderID int64) (*Order, error) {
-	query := `SELECT id, user_id, stock_id, status, version FROM orders
+	query := `SELECT id, user_id, quantity, price, stock_id, status, version FROM orders
 						WHERE id = $1`
 
 	args := []any{orderID}
@@ -94,6 +98,8 @@ func (m OrderModel) GetOrderForUpdate(orderID int64) (*Order, error) {
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
 		&order.ID,
 		&order.UserID,
+		&order.Quantity,
+		&order.Price,
 		&order.StockID,
 		&order.Status,
 		&order.Version,

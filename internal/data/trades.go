@@ -20,7 +20,8 @@ type Trade struct {
 
 func (m TradeModel) Insert(trade Trade) error {
 
-	query := `INSERT INTO trades (user_id, order_id, quantity, price, executed_at)`
+	query := `INSERT INTO trades (user_id, order_id, quantity, price, executed_at)
+						VALUES ($1, $2, $3, $4, $5)`
 
 	args := []any{
 		trade.UserID,
