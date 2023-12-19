@@ -20,7 +20,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/users/authentication", app.userLoginHandler)
 
 	// order
-	router.HandlerFunc(http.MethodPost, "/v1/orders", app.requireAuthenticatedUser(app.orderCreate))
+	router.HandlerFunc(http.MethodPost, "/v1/orders", app.requireAuthenticatedUser(app.orderCreateHandler))
 
 	// for adjust fake stock value
 	router.HandlerFunc(http.MethodPost, "/v1/stockValueChangeHandler", app.adjustStockPrice)

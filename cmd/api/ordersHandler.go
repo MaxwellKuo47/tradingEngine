@@ -9,7 +9,7 @@ import (
 	"github.com/maxwellkuo47/tradingEngine/internal/validator"
 )
 
-func (app *application) orderCreate(w http.ResponseWriter, r *http.Request) {
+func (app *application) orderCreateHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		StockID   int64   `json:"stock_id"`
 		Type      int     `json:"type"`

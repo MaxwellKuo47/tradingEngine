@@ -13,8 +13,6 @@ This project is built using the following technologies and tools:
 - **Redis**: Utilizes sorted sets to manage order prices as keys for queue access, and implements FIFO (First-In-First-Out) queues for efficient order processing. 
 - **Docker**: Used for containerization, ensuring consistent environments and ease of deployment.
 
-Each technology has been selected to optimize the performance and scalability of the trading engine, ensuring quick processing of high-frequency trading data.
-
 ## Installation and Setup
 
 This project uses Docker for Redis and PostgreSQL, and requires the Go-Migrate CLI tool. Follow these steps to get started:
@@ -53,14 +51,13 @@ This project uses Docker for Redis and PostgreSQL, and requires the Go-Migrate C
   ```
 
 5. **Build the Application and Run**:
-- Build the application
+- Build and run the application
   ```
   make build/api
-  ```
-- Select your system and run
-  ```
-  # for linux os
-  ./bin/linux_amd64/api
+  ./bin/linux_amd64/api   # for linux os
+
+  # Or directly run it
+  go run ./cmd/api
   ```
 ## Database Schema
 ![image](https://github.com/MaxwellKuo47/tradingEngine/blob/main/assets/db/schema.png)
@@ -74,6 +71,27 @@ The Trading Engine uses a PostgreSQL database with the following key tables:
 - `stocks`: Lists available stocks in the trading platform.
 
 Indexes and foreign keys are used for optimized query performance and data integrity. The schema is designed to support efficient order processing and user management in a high-frequency trading environment.
+
+## Order Processing Mechanism
+
+### Overview
+Our trading engine handles incoming orders by integrating postgreSQL with Redis to ensure efficient order management and execution. Here's how the process works:
+
+### Order Recording
+- Upon receiving an order, its details are recorded in the postgreSQL for persistence and tracking.
+
+### Order Queuing and Prioritization
+![image](https://github.com/MaxwellKuo47/tradingEngine/blob/main/assets/db/DS.png)
+- Buy/Sell orders are managed using Redis data structures:
+  - **Sorted Sets (Heaps)**: Each order's price is added to a Redis sorted set, serving as a heap. Buy orders are organized in descending order, while sell orders are in ascending order.
+  - **FIFO Queues**: Corresponding to each price point in the heap, there's a Redis list (queue) that stores orders at that price. Orders in the same queue have identical prices, differing only in their arrival times.
+
+### Order Matching and Execution
+- Each `stock_id` has buy and sell consumers continuously get current stock price and monitor the heaps.
+- The buy consumer examines the highest value in the buy heap, and the sell consumer looks at the lowest in the sell heap.
+- If an order meets the criteria for execution (i.e., the current stock price 
+less than or equal to the highest buy price in the heap), the order is consumed.
+- After the execution, the trade details and user balances are updated in the database. Additionally, if a queue becomes empty, the corresponding price in the heap is also removed.
 
 ## API Documentation
 
@@ -165,3 +183,10 @@ Use for simulating stock price change to trigger buy/sell order consuming
         }
     }
     ```
+## Future Enhancements
+
+Given more time and resources, the following improvements are planned for the Trading Engine:
+
+1. **Load Testing with K6**: Implement K6 scripts for more comprehensive load testing. This will automate the testing process, eliminating the need for manual testing with tools like Postman or curl.
+
+2. **Unit Testing**: Develop a suite of unit tests to ensure code robustness and reliability, further enhancing the quality and stability of the application.
