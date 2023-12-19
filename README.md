@@ -59,6 +59,25 @@ This project uses Docker for Redis and PostgreSQL, and requires the Go-Migrate C
   # Or directly run it
   go run ./cmd/api
   ```
+## Test Procedure
+
+To test the Trading Engine's functionalities, follow these steps:
+
+1. **Create User**:
+   - Send a `POST` request to `http://localhost:8080/v1/users` with the user details to create a user.
+
+2. **User Login**:
+   - Send a `POST` request to `http://localhost:8080/v1/users/authentication` with the user's email and password.
+   - Capture the returned authentication token.
+
+3. **Create Orders**:
+   - Using the obtained token, send a `POST` request to `http://localhost:8080/v1/orders` with order details and the header `Authorization: Bearer <token>`.
+
+4. **Trigger Order Consuming**:
+   - Adjust the stock price by sending a `POST` request to `http://localhost:8080/v1/stockValueChangeHandler`. This will trigger the order consuming module if the conditions are met (current stock price lower or equal to buy order price or current stock price higher or equal to sell order price).
+
+Each step should be performed sequentially to ensure the proper functioning of the trading engine.
+
 ## Database Schema
 ![image](https://github.com/MaxwellKuo47/tradingEngine/blob/main/assets/db/schema.png)
 The Trading Engine uses a PostgreSQL database with the following key tables:
