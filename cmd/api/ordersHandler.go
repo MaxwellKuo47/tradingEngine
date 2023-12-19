@@ -35,7 +35,14 @@ func (app *application) orderCreateHandler(w http.ResponseWriter, r *http.Reques
 	if order.PriceType == data.ORDER_PRCIE_TYPE_MARKET {
 		currentStockPrice, _ := app.mockStockPrices.Load(order.StockID)
 		// let the order could be consumed immediately
-		order.Price = currentStockPrice.(float64) + 10.0
+		switch order.Type {
+		case data.ORDER_TYPE_BUY:
+			order.Price = currentStockPrice.(float64) + 10.0
+		case data.ORDER_TYPE_SELL:
+			order.Price = currentStockPrice.(float64) - 10.0
+		default:
+			//just ignore because this request would be return by validator
+		}
 	}
 
 	// validate input data
