@@ -204,7 +204,7 @@ Use for simulating stock price change to trigger buy/sell order consuming
     ```
 ## Future Enhancements
 
-Given more time and resources, the following improvements are planned for the Trading Engine:
+The following improvements are planned for the Trading Engine:
 
 1. **Load Testing with K6**: Implement K6 scripts for more comprehensive load testing. This will automate the testing process, eliminating the need for manual testing with tools like Postman or curl.
 
