@@ -96,7 +96,7 @@ func (app *application) background(usage string, fn func()) {
 			if err := recover(); err != nil {
 				app.errorLogger.Error("error background", slog.String("usage", usage), slog.Any("msg", err))
 			}
-			fn()
 		}()
+		fn()
 	}()
 }
